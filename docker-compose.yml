@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: finansmart-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: finansmart
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  app:
+    build: .
+    container_name: finansmart-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: finansmart
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:

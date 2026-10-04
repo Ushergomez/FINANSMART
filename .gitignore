@@ -1,0 +1,20 @@
+# Maven
+target/
+bin/
+# Java
+*.class
+*.log
+hs_err_pid*
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Datos locales de Docker
+mysql-data/
+db-data/

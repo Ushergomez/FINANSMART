@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Movimientos - FinanSmart</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; background:#f5f5f5; margin:0 }
+    .navbar { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center }
+    .container { max-width:1100px; margin:28px auto; background:#fff; padding:24px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,.08) }
+    h1 { margin:0 0 14px 0 }
+    .stats { display:flex; gap:14px; margin-bottom:16px; flex-wrap:wrap }
+    .card { flex:1; min-width:240px; background:#fafafa; border:1px solid #eee; border-radius:8px; padding:14px; text-align:center }
+    .ingreso { color:#0a8f3a; }
+    .gasto { color:#c62828; }
+    .saldo { color:#3949ab; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin:12px 0 12px; gap:12px; flex-wrap:wrap }
+    .btn { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block }
+    table { width:100%; border-collapse:collapse }
+    th, td { padding:10px; border-bottom:1px solid #eee; text-align:left }
+    .tag { padding:4px 8px; border-radius:12px; font-size:12px; display:inline-block }
+    .tag.ingreso { background:#e8f5e9; color:#2e7d32 }
+    .tag.gasto { background:#ffebee; color:#c62828 }
+    form.inline { display:inline }
+    /* Filtro */
+    .filter { display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin:8px 0 16px }
+    .filter .field { display:flex; flex-direction:column; gap:6px }
+    .filter label { font-size:12px; color:#555 }
+    .filter input[type="date"] { padding:8px; border:1px solid #ddd; border-radius:6px }
+    /* Flash */
+    .flash-ok { background:#e8f5e9; color:#2e7d32; padding:10px 14px; border:1px solid #c8e6c9; border-radius:6px; margin-bottom:12px }
+    .flash-err { background:#ffebee; color:#c62828; padding:10px 14px; border:1px solid #ffcdd2; border-radius:6px; margin-bottom:12px }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div>💰 FinanSmart</div>
+    <div>
+      <a href="/dashboard" class="btn" style="background:#455a64">Dashboard</a>
+      <a href="/logout" class="btn">Cerrar sesión</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="topbar">
+      <h1>Movimientos</h1>
+      <a href="/movimientos/nuevo" class="btn">+ Nuevo movimiento</a>
+    </div>
+
+    <!-- Mensajes flash -->
+    <div th:if="${success}" class="flash-ok">
+      <span th:text="${success}">Operación exitosa.</span>
+    </div>
+    <div th:if="${error}" class="flash-err">
+      <span th:text="${error}">Ocurrió un error.</span>
+    </div>
+
+    <!-- Filtro por fechas -->
+    <form method="get" action="/movimientos" class="filter">
+      <div class="field">
+        <label>Desde</label>
+        <input type="date" name="desde" th:value="${#temporals.format(desde, 'yyyy-MM-dd')}">
+      </div>
+      <div class="field">
+        <label>Hasta</label>
+        <input type="date" name="hasta" th:value="${#temporals.format(hasta, 'yyyy-MM-dd')}">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" type="submit">Filtrar</button>
+        <a class="btn" href="/movimientos" style="background:#455a64;">Mes actual</a>
+      </div>
+    </form>
+
+    <div class="stats">
+      <div class="card ingreso">
+        <div>Ingresos del rango</div>
+        <h2 th:text="${#numbers.formatCurrency(ingresosMes)}">$0</h2>
+      </div>
+      <div class="card gasto">
+        <div>Gastos del rango</div>
+        <h2 th:text="${#numbers.formatCurrency(gastosMes)}">$0</h2>
+      </div>
+      <div class="card saldo">
+        <div>Saldo del rango</div>
+        <h2 th:text="${#numbers.formatCurrency(saldoMes)}">$0</h2>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Categoría</th>
+          <th>Monto</th>
+          <th>Descripción</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="m : ${movimientos}">
+          <td th:text="${m.fecha}">2025-10-24</td>
+          <td>
+            <span class="tag ingreso" th:if="${m.tipo.name() == 'INGRESO'}">Ingreso</span>
+            <span class="tag gasto" th:if="${m.tipo.name() == 'GASTO'}">Gasto</span>
+          </td>
+          <td th:text="${m.categoria}">Salario</td>
+          <td th:text="${#numbers.formatCurrency(m.monto)}">$0</td>
+          <td th:text="${m.descripcion}">-</td>
+          <td>
+            <a class="btn" th:href="@{'/movimientos/' + ${m.id} + '/editar'}" style="background:#1976d2; margin-right:6px;">Editar</a>
+            <form class="inline" th:action="@{'/movimientos/' + ${m.id} + '/eliminar'}" method="post"
+                  onsubmit="return confirm('¿Eliminar este movimiento?');">
+              <button class="btn" style="background:#c62828">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(movimientos)}">
+          <td colspan="6" style="text-align:center; color:#777">No hay movimientos en el rango seleccionado</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

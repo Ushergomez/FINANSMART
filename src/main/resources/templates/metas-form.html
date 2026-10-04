@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${meta.id} != null ? 'Editar Meta - FinanSmart' : 'Nueva Meta - FinanSmart'">Nueva Meta - FinanSmart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; background:#f5f5f5; margin:0 }
+    .navbar { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center }
+    .container { max-width:700px; margin:28px auto; background:#fff; padding:24px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,.08) }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px }
+    label { display:block; margin:8px 0 6px; color:#333 }
+    input, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:6px }
+    .btn { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; text-decoration:none; margin-top:14px }
+    .hint { font-size:12px; color:#666; margin-top:6px }
+    .flash-err { background:#ffebee; color:#c62828; padding:10px 14px; border:1px solid #ffcdd2; border-radius:6px; margin-bottom:12px }
+    .flash-ok { background:#e8f5e9; color:#2e7d32; padding:10px 14px; border:1px solid #c8e6c9; border-radius:6px; margin-bottom:12px }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div>🎯 FinanSmart</div>
+    <div>
+      <a href="/metas" class="btn" style="background:#455a64">Volver</a>
+      <a href="/logout" class="btn">Cerrar sesión</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 th:text="${meta.id} != null ? 'Editar meta' : 'Nueva meta'">Nueva meta</h1>
+
+    <div th:if="${error}" class="flash-err" th:text="${error}">Error</div>
+    <div th:if="${success}" class="flash-ok" th:text="${success}">OK</div>
+
+    <form th:action="${meta.id} != null ? @{'/metas/' + ${meta.id}} : @{/metas}"
+          method="post" th:object="${meta}">
+
+      <div class="form-row">
+        <div>
+          <label>Nombre de la meta</label>
+          <input type="text" th:field="*{nombre}" placeholder="Ej: Laptop nueva" required>
+        </div>
+        <div>
+          <label>Monto objetivo</label>
+          <input type="number" th:field="*{montoObjetivo}" step="0.01" min="0.01" placeholder="0.00" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Monto actual</label>
+          <input type="number" th:field="*{montoActual}" step="0.01" min="0.00" placeholder="0.00">
+          <div class="hint">También puedes ir aportando desde la lista.</div>
+        </div>
+        <div>
+          <label>Fecha límite (opcional)</label>
+          <input type="date" th:field="*{fechaLimite}">
+        </div>
+      </div>
+
+      <div>
+        <label>Estado</label>
+        <select th:field="*{completada}">
+          <option th:value="false">Activa</option>
+          <option th:value="true">Completada</option>
+        </select>
+      </div>
+
+      <button class="btn" type="submit" th:text="${meta.id} != null ? 'Actualizar' : 'Guardar'">Guardar</button>
+    </form>
+  </div>
+</body>
+</html>
